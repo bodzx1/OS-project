@@ -127,6 +127,7 @@ UPROGS=\
 	$U/_cat\
 	$U/_echo\
 	$U/_add\
+	$U/_diff\
 	$U/_fact\
 	$U/_touch\
 	$U/_countkeyboard\
