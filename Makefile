@@ -130,6 +130,10 @@ UPROGS=\
 	$U/_diff\
 	$U/_fact\
 	$U/_touch\
+	$U/_cp\
+	$U/_find\
+	$U/_tail\
+	$U/_mv\
 	$U/_countkeyboard\
 	$U/_sleep\
 	$U/_forktest\
