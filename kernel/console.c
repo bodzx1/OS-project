@@ -30,6 +30,9 @@
 // called by printf(), and to echo input characters,
 // but not from write().
 //
+
+int kbd_intr_count = 0;
+
 void
 consputc(int c)
 {
@@ -137,7 +140,7 @@ void
 consoleintr(int c)
 {
   acquire(&cons.lock);
-  kbd_interrupt_counter++;
+  kbd_intr_count++;
 
   switch(c){
   case C('P'):  // Print process list.

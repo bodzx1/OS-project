@@ -135,6 +135,9 @@ UPROGS=\
 	$U/_tail\
 	$U/_mv\
 	$U/_countsyscall\
+	$U/_getppid\
+	$U/_sysrand\
+	$U/_kbdint\
 	$U/_countkeyboard\
 	$U/_sleep\
 	$U/_forktest\

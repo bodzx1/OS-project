@@ -24,6 +24,8 @@ int sleep(int);
 int uptime(void);
 int kbdint(void);
 int countsyscall(void);
+int getppid(void);
+int sysrand(void);
 
 // ulib.c
 int stat(const char*, struct stat*);
