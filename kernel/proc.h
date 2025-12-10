@@ -93,6 +93,12 @@ struct proc {
   int pid;
   uint creation_time;          // Ticks when process was created
   uint run_time;               // How long the process has run                   // Process ID
+  int priority;                // lower = higher priority
+  int wait_time;         // time spent in RUNNABLE
+  int finish_time;       // time process exited
+  int response_time;     // time from creation to first run
+  int responded;
+
 
   // wait_lock must be held when using this:
   struct proc *parent;         // Parent process
@@ -111,5 +117,6 @@ struct proc {
 // schedular constants to set the scheduling mode
 #define SCHED_ROUND_ROBIN 0
 #define SCHED_FCFS        1
+#define SCHED_PBS         2
 
 extern int sched_mode;  // Declare global scheduler mode

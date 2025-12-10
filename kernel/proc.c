@@ -148,6 +148,12 @@ found:
   // initialize new variables here
   p->creation_time = ticks;
   p->run_time = 0;
+  p->priority = 1 + ((ticks + p->pid) % 100);
+  p->wait_time = 0;                 // initially 0
+  p->finish_time = 0;               // initially 0
+  p->response_time = 0;             // will set on first RUNNING
+  p->responded = 0;                 // not yet run
+
 
   return p;
 }
@@ -175,19 +181,34 @@ freeproc(struct proc *p)
   p->creation_time = ticks;
   p->run_time = 0;
 }
-void
-update_time()
-{
-  struct proc* p;
-  for (p = proc; p < &proc[NPROC]; p++) {
-    acquire(&p->lock);
-    if (p->state == RUNNING) {
-      p->run_time++;
-    }
+void update_time() {
+    struct proc *p;
+    for(p = proc; p < &proc[NPROC]; p++){
+        acquire(&p->lock);
 
-    release(&p->lock);
-  }
+        switch(p->state){
+            case RUNNING:
+                p->run_time += 1;
+
+                // Set response_time if this is the first time the process runs
+                if (!p->responded) {
+                    p->response_time = ticks - p->creation_time;
+                    p->responded = 1;
+                }
+                break;
+
+            case RUNNABLE:
+                p->wait_time += 1;
+                break;
+
+            default:
+                break; // SLEEPING, ZOMBIE, etc.
+        }
+
+        release(&p->lock);
+    }
 }
+
 
 // Create a user page table for a given process, with no user memory,
 // but with trampoline and trapframe pages.
@@ -364,44 +385,51 @@ reparent(struct proc *p)
 void
 exit(int status)
 {
-  struct proc *p = myproc();
+    struct proc *p = myproc();
 
-  if(p == initproc)
-    panic("init exiting");
+    if(p == initproc)
+        panic("init exiting");
 
-  // Close all open files.
-  for(int fd = 0; fd < NOFILE; fd++){
-    if(p->ofile[fd]){
-      struct file *f = p->ofile[fd];
-      fileclose(f);
-      p->ofile[fd] = 0;
+    // Close all open files.
+    for(int fd = 0; fd < NOFILE; fd++){
+        if(p->ofile[fd]){
+            struct file *f = p->ofile[fd];
+            fileclose(f);
+            p->ofile[fd] = 0;
+        }
     }
-  }
 
-  begin_op();
-  iput(p->cwd);
-  end_op();
-  p->cwd = 0;
+    begin_op();
+    iput(p->cwd);
+    end_op();
+    p->cwd = 0;
 
-  acquire(&wait_lock);
+    acquire(&wait_lock);
 
-  // Give any children to init.
-  reparent(p);
+    // Give any children to init.
+    reparent(p);
 
-  // Parent might be sleeping in wait().
-  wakeup(p->parent);
+    // Parent might be sleeping in wait().
+    wakeup(p->parent);
 
-  acquire(&p->lock);
+    acquire(&p->lock);
 
-  p->xstate = status;
-  p->state = ZOMBIE;
+    //METRICS TRACKING
+    p->finish_time = ticks;  // record exit time
+    int turnaround = p->finish_time - p->creation_time;
 
-  release(&wait_lock);
+    printf("Process exiting: PID=%d\n", p->pid);
+    printf("Run Time=%d, Wait Time=%d, Response Time=%d, Turnaround Time=%d\n",p->run_time, p->wait_time, p->response_time, turnaround);
+    p->xstate = status;
+    p->state = ZOMBIE;
 
-  // Jump into the scheduler, never to return.
-  sched();
-  panic("zombie exit");
+    release(&wait_lock);
+
+    // Jump into the scheduler, never to return.
+    sched();
+    panic("zombie exit");
 }
+
 
 // Wait for a child process to exit and return its pid.
 // Return -1 if this process has no children.
@@ -459,7 +487,7 @@ wait(uint64 addr)
 //  - swtch to start running that process.
 //  - eventually that process transfers control
 //    via swtch back to the scheduler.
-int sched_mode = SCHED_ROUND_ROBIN;  // Assign the chosen scheduler here
+int sched_mode = SCHED_PBS;  // Assign the chosen scheduler here
 struct proc *choose_next_process() {
 
   struct proc *p;
@@ -470,13 +498,45 @@ struct proc *choose_next_process() {
         return p;
       }
   }
-  // else if (sched_mode == SCHED_FCFS) {
-  //   // TODO
-  //   return p;
-  // }
+  else if (sched_mode == SCHED_FCFS) {
+    struct proc *chosen = 0;
+
+    for (p = proc; p < &proc[NPROC]; p++) {
+        if (p->state == RUNNABLE) {
+            if (chosen == 0 || p->creation_time < chosen->creation_time) {
+                chosen = p;
+            }
+        }
+    }
+
+    return chosen;
+  }
+  else if (sched_mode == SCHED_PBS)
+  {
+    struct proc *chosen = 0;
+
+    for (p = proc; p < &proc[NPROC]; p++) {
+        if (p->state == RUNNABLE) {
+            if (chosen == 0) {
+                chosen = p;
+            }
+            else if (p->priority < chosen->priority) {
+                // Smaller priority value = higher priority
+                chosen = p;
+            }
+        }
+    }
+    // if(chosen)
+    // printf("[PBS] Choosing PID=%d, priority=%d, creation_time=%d\n",chosen->pid, chosen->priority, chosen->creation_time);
+    return chosen;
+}
+
+
+
   //law scheduler tany else if talet
 
   // Add more else statements each time you create a new scheduler
+
 
   return 0;
 }
