@@ -33,7 +33,7 @@ void
 proc_mapstacks(pagetable_t kpgtbl)
 {
   struct proc *p;
-  
+
   for(p = proc; p < &proc[NPROC]; p++) {
     char *pa = kalloc();
     if(pa == 0)
@@ -48,7 +48,7 @@ void
 procinit(void)
 {
   struct proc *p;
-  
+
   initlock(&pid_lock, "nextpid");
   initlock(&wait_lock, "wait_lock");
   for(p = proc; p < &proc[NPROC]; p++) {
@@ -93,7 +93,7 @@ int
 allocpid()
 {
   int pid;
-  
+
   acquire(&pid_lock);
   pid = nextpid;
   nextpid = nextpid + 1;
@@ -145,6 +145,9 @@ found:
   memset(&p->context, 0, sizeof(p->context));
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
+  // initialize new variables here
+  p->creation_time = ticks;
+  p->run_time = 0;
 
   return p;
 }
@@ -169,6 +172,21 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->state = UNUSED;
+  p->creation_time = ticks;
+  p->run_time = 0;
+}
+void
+update_time()
+{
+  struct proc* p;
+  for (p = proc; p < &proc[NPROC]; p++) {
+    acquire(&p->lock);
+    if (p->state == RUNNING) {
+      p->run_time++;
+    }
+
+    release(&p->lock);
+  }
 }
 
 // Create a user page table for a given process, with no user memory,
@@ -236,7 +254,7 @@ userinit(void)
 
   p = allocproc();
   initproc = p;
-  
+
   // allocate one user page and copy initcode's instructions
   // and data into it.
   uvmfirst(p->pagetable, initcode, sizeof(initcode));
@@ -372,7 +390,7 @@ exit(int status)
 
   // Parent might be sleeping in wait().
   wakeup(p->parent);
-  
+
   acquire(&p->lock);
 
   p->xstate = status;
@@ -428,7 +446,7 @@ wait(uint64 addr)
       release(&wait_lock);
       return -1;
     }
-    
+
     // Wait for a child to exit.
     sleep(p, &wait_lock);  //DOC: wait-sleep
   }
@@ -441,6 +459,27 @@ wait(uint64 addr)
 //  - swtch to start running that process.
 //  - eventually that process transfers control
 //    via swtch back to the scheduler.
+int sched_mode = SCHED_ROUND_ROBIN;  // Assign the chosen scheduler here
+struct proc *choose_next_process() {
+
+  struct proc *p;
+
+  if(sched_mode == SCHED_ROUND_ROBIN) {
+    for(p = proc; p < &proc[NPROC]; p++) {
+      if (p->state == RUNNABLE)
+        return p;
+      }
+  }
+  // else if (sched_mode == SCHED_FCFS) {
+  //   // TODO
+  //   return p;
+  // }
+  //law scheduler tany else if talet
+
+  // Add more else statements each time you create a new scheduler
+
+  return 0;
+}
 void
 scheduler(void)
 {
@@ -455,12 +494,13 @@ scheduler(void)
     intr_on();
 
     int found = 0;
-    for(p = proc; p < &proc[NPROC]; p++) {
+
+    p = choose_next_process();
+
+    if(p != 0) {
       acquire(&p->lock);
-      if(p->state == RUNNABLE) {
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
+
+      if (p->state == RUNNABLE) {
         p->state = RUNNING;
         c->proc = p;
         swtch(&c->context, &p->context);
@@ -548,7 +588,7 @@ void
 sleep(void *chan, struct spinlock *lk)
 {
   struct proc *p = myproc();
-  
+
   // Must acquire p->lock in order to
   // change p->state and then call sched.
   // Once we hold p->lock, we can be
@@ -627,7 +667,7 @@ int
 killed(struct proc *p)
 {
   int k;
-  
+
   acquire(&p->lock);
   k = p->killed;
   release(&p->lock);

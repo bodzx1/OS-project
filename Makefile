@@ -128,6 +128,7 @@ UPROGS=\
 	$U/_echo\
 	$U/_add\
 	$U/_diff\
+	$U/_schedtest\
 	$U/_fact\
 	$U/_touch\
 	$U/_cp\

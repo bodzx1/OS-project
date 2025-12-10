@@ -109,6 +109,8 @@ void            procdump(void);
 
 // swtch.S
 void            swtch(struct context*, struct context*);
+//updatetime.c
+void            update_time();
 
 // spinlock.c
 void            acquire(struct spinlock*);

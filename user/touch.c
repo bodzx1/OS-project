@@ -9,7 +9,7 @@ main(int argc, char *argv[])
   if(argc==1)
   printf("creates an empty file if file does not exist , raises an error if it does"),exit(0);
   char* file_name=argv[1];
-  int fd=open(file_name,0);
+  int fd=open(file_name,0); //o_rdonly as default
   if(fd>=0)
   {//file exists
   printf("error,this file %s exists",file_name);

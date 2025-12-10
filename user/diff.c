@@ -40,34 +40,34 @@ compare_files(int fd1, int fd2, char *name1, char *name2)
             // Compare the content of the two lines
             if (strcmp(line1, line2) != 0) {
                 printf("Line %d differs:\n", line_num);
-                printf("< %s", line1); // line1 already contains '\n' or '\0'
-                printf("> %s", line2);
+                printf("<< %s", line1); // line1 already contains '\n' or '\0'
+                printf(">> %s", line2);
                 is_identical = 0;
             }
         }
         // Case 3: File 1 ended, but File 2 still has lines
         else if (len1 == 0 && len2 > 0) {
             printf("Line %d only in %s:\n", line_num, name2);
-            printf("> %s", line2);
+            printf(">> %s", line2);
             is_identical = 0;
             // Keep printing the rest of file 2 until EOF
             while ((len2 = read_line(fd2, line2)) > 0) {
                 line_num++;
                 printf("Line %d only in %s:\n", line_num, name2);
-                printf("> %s", line2);
+                printf(">> %s", line2);
             }
             break; // Finished both files
         }
         // Case 4: File 2 ended, but File 1 still has lines
         else if (len1 > 0 && len2 == 0) {
             printf("Line %d only in %s:\n", line_num, name1);
-            printf("< %s", line1);
+            printf("<< %s", line1);
             is_identical = 0;
             // Keep printing the rest of file 1 until EOF
             while ((len1 = read_line(fd1, line1)) > 0) {
                 line_num++;
                 printf("Line %d only in %s:\n", line_num, name1);
-                printf("< %s", line1);
+                printf("<< %s", line1);
             }
             break; // Finished both files
         }
