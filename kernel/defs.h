@@ -143,6 +143,8 @@ int             fetchstr(uint64, char*, int);
 int             fetchaddr(uint64, uint64*);
 void            syscall();
 
+uint64 sys_datetime(void);
+
 // trap.c
 extern uint     ticks;
 void            trapinit(void);

@@ -1,4 +1,5 @@
 struct stat;
+struct datetime;
 
 // system calls
 int fork(void);
@@ -27,6 +28,7 @@ int countsyscall(void);
 int getppid(void);
 int sysrand(void);
 int shutdown(void);
+int datetime(struct datetime *);
 
 // ulib.c
 int stat(const char*, struct stat*);

@@ -25,6 +25,8 @@ kvmmake(void)
   memset(kpgtbl, 0, PGSIZE);
   // map the SiFive Test device (for shutdown)
   kvmmap(kpgtbl, R_TEST, R_TEST, PGSIZE, PTE_R | PTE_W);
+  //mapping clint
+  kvmmap(kpgtbl, CLINT, CLINT, 0x10000, PTE_R | PTE_W);
   // uart registers
   kvmmap(kpgtbl, UART0, UART0, PGSIZE, PTE_R | PTE_W);
 

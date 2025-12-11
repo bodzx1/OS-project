@@ -41,3 +41,4 @@ entry("countsyscall");
 entry("getppid");
 entry("sysrand");
 entry("shutdown");
+entry("datetime");
