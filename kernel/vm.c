@@ -23,7 +23,8 @@ kvmmake(void)
 
   kpgtbl = (pagetable_t) kalloc();
   memset(kpgtbl, 0, PGSIZE);
-
+  // map the SiFive Test device (for shutdown)
+  kvmmap(kpgtbl, R_TEST, R_TEST, PGSIZE, PTE_R | PTE_W);
   // uart registers
   kvmmap(kpgtbl, UART0, UART0, PGSIZE, PTE_R | PTE_W);
 
@@ -45,7 +46,7 @@ kvmmake(void)
 
   // allocate and map a kernel stack for each process.
   proc_mapstacks(kpgtbl);
-  
+
   return kpgtbl;
 }
 
@@ -154,7 +155,7 @@ mappages(pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, int perm)
 
   if(size == 0)
     panic("mappages: size");
-  
+
   a = va;
   last = va + size - PGSIZE;
   for(;;){
@@ -345,7 +346,7 @@ void
 uvmclear(pagetable_t pagetable, uint64 va)
 {
   pte_t *pte;
-  
+
   pte = walk(pagetable, va, 0);
   if(pte == 0)
     panic("uvmclear");

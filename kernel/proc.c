@@ -487,7 +487,7 @@ wait(uint64 addr)
 //  - swtch to start running that process.
 //  - eventually that process transfers control
 //    via swtch back to the scheduler.
-int sched_mode = SCHED_PBS;  // Assign the chosen scheduler here
+int sched_mode = SCHED_ROUND_ROBIN;  // Assign the chosen scheduler here
 struct proc *choose_next_process() {
 
   struct proc *p;
