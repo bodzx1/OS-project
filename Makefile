@@ -129,6 +129,7 @@ UPROGS=\
 	$U/_shutdown\
 	$U/_uptime\
 	$U/_datetime\
+	$U/_getptable\
 	$U/_add\
 	$U/_diff\
 	$U/_schedtest\

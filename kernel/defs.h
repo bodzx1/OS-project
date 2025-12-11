@@ -144,6 +144,7 @@ int             fetchaddr(uint64, uint64*);
 void            syscall();
 
 uint64 sys_datetime(void);
+int getptable(int, char*);
 
 // trap.c
 extern uint     ticks;

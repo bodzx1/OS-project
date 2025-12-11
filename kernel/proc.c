@@ -418,8 +418,8 @@ exit(int status)
     p->finish_time = ticks;  // record exit time
     int turnaround = p->finish_time - p->creation_time;
 
-    printf("Process exiting: PID=%d\n", p->pid);
-    printf("Run Time=%d, Wait Time=%d, Response Time=%d, Turnaround Time=%d\n",p->run_time, p->wait_time, p->response_time, turnaround);
+    //printf("Process exiting: PID=%d\n", p->pid);
+    //printf("Run Time=%d, Wait Time=%d, Response Time=%d, Turnaround Time=%d\n",p->run_time, p->wait_time, p->response_time, turnaround);
     p->xstate = status;
     p->state = ZOMBIE;
 
@@ -792,4 +792,42 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+int
+getptable(int nproc, char *buffer)
+{
+  struct proc *p;
+  struct pinfo temp;
+  int count = 0;
+  uint64 dst_addr;
+
+  if (nproc < 1 || buffer == 0)
+    return 0;
+
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+    if(p->state != UNUSED){
+      if (count >= nproc) {
+        release(&p->lock);
+        break;
+      }
+
+      // Fill Kernel Struct
+      temp.pid = p->pid;
+      temp.ppid = p->parent ? p->parent->pid : 0;
+      temp.state = p->state;
+      temp.sz = p->sz;
+      safestrcpy(temp.name, p->name, sizeof(temp.name));
+
+      // Copy to User Space
+      dst_addr = (uint64)buffer + (count * sizeof(struct pinfo));
+      if(copyout(myproc()->pagetable, dst_addr, (char *)&temp, sizeof(temp)) < 0){
+        release(&p->lock);
+        return 0;
+      }
+      count++;
+    }
+    release(&p->lock);
+  }
+  return 1;
 }

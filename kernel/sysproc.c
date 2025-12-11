@@ -195,3 +195,14 @@ sys_datetime(void)
 
   return 0;
 }
+uint64
+sys_getptable(void)
+{
+  int nproc;
+  uint64 addr;
+
+  argint(0, &nproc);
+  argaddr(1, &addr);
+
+  return getptable(nproc, (char *)addr);
+}

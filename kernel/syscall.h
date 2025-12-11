@@ -26,3 +26,4 @@
 #define SYS_sysrand 25
 #define SYS_shutdown 26
 #define SYS_datetime 27
+#define SYS_getptable 28
