@@ -127,6 +127,7 @@ UPROGS=\
 	$U/_cat\
 	$U/_echo\
 	$U/_shutdown\
+	$U/_uptime\
 	$U/_add\
 	$U/_diff\
 	$U/_schedtest\
