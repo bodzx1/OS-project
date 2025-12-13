@@ -18,13 +18,13 @@ sys_countsyscall(void)
   return syscall_count;
 }
 
-uint64
-sys_getppid(void)
-{
-  // You'll need to implement this differently if proc.h causes issues
-  // Return a dummy value for testing
-  return 2;  // Assuming init process is always PID 2
-}
+// uint64
+// sys_getppid(void)
+// {
+//   // You'll need to implement this differently if proc.h causes issues
+//   // Return a dummy value for testing
+//   return 2;  // Assuming init process is always PID 2
+// }
 
 // ULTRA SIMPLE RAND - always returns increasing numbers
 static uint64 simple_counter = 1000;

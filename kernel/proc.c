@@ -416,7 +416,7 @@ exit(int status)
 
     //METRICS TRACKING
     p->finish_time = ticks;  // record exit time
-    int turnaround = p->finish_time - p->creation_time;
+    //int turnaround = p->finish_time - p->creation_time;
 
     //printf("Process exiting: PID=%d\n", p->pid);
     //printf("Run Time=%d, Wait Time=%d, Response Time=%d, Turnaround Time=%d\n",p->run_time, p->wait_time, p->response_time, turnaround);
@@ -830,4 +830,13 @@ getptable(int nproc, char *buffer)
     release(&p->lock);
   }
   return 1;
+}
+int
+sys_getppid(void)
+{
+    struct proc *p = myproc();   // current process
+    if(p->parent)
+        return p->parent->pid;   // return parent PID
+    else
+        return 0;                 // no parent (e.g., init)
 }

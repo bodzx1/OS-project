@@ -8,7 +8,7 @@ main(int argc, char *argv[])
   int i;
 
   if(argc < 2){
-    fprintf(2, "Usage: rm files...\n");
+    fprintf(2, "rm deletes files\n");
     exit(1);
   }
 
@@ -17,6 +17,7 @@ main(int argc, char *argv[])
       fprintf(2, "rm: %s failed to delete\n", argv[i]);
       break;
     }
+    else printf("file deleted successfuly");
   }
 
   exit(0);

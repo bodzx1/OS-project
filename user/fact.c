@@ -13,7 +13,7 @@ int
 main(int argc, char *argv[])
 {
   if(argc==1)
-  printf("returns the factorial of a given number"),exit(0);
+  printf("returns the factorial of a given number\n"),exit(0);
   if(argc!=2)
   {
   printf("error,arguments missing or too many arguments\n");
