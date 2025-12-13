@@ -416,10 +416,21 @@ exit(int status)
 
     //METRICS TRACKING
     p->finish_time = ticks;  // record exit time
-    //int turnaround = p->finish_time - p->creation_time;
+
+    int turnaround = p->finish_time - p->creation_time;
+    if(strncmp(p->name, "schedtest", 9) == 0) {
+        if(sched_mode==SCHED_PBS)
+      printf("priority is %d ",p->priority);
+      printf("[pid=%d]| Turnaround=%d | Wait=%d | Run=%d\n",
+             p->pid,
+             turnaround,
+             p->wait_time,
+             p->run_time);
+  }
 
     //printf("Process exiting: PID=%d\n", p->pid);
     //printf("Run Time=%d, Wait Time=%d, Response Time=%d, Turnaround Time=%d\n",p->run_time, p->wait_time, p->response_time, turnaround);
+    //removed as it spams the terminal with prints
     p->xstate = status;
     p->state = ZOMBIE;
 
@@ -487,7 +498,7 @@ wait(uint64 addr)
 //  - swtch to start running that process.
 //  - eventually that process transfers control
 //    via swtch back to the scheduler.
-int sched_mode = SCHED_ROUND_ROBIN;  // Assign the chosen scheduler here
+int sched_mode =SCHED_ROUND_ROBIN;  // Assign the chosen scheduler here
 struct proc *choose_next_process() {
 
   struct proc *p;
@@ -520,8 +531,9 @@ struct proc *choose_next_process() {
             if (chosen == 0) {
                 chosen = p;
             }
-            else if (p->priority < chosen->priority) {
+            else if (p->priority > chosen->priority) {
                 // Smaller priority value = higher priority
+                //changed to larger value=higher priority to differenciate it better
                 chosen = p;
             }
         }

@@ -118,7 +118,8 @@ sys_datetime(void)
   // The structure to hold the calculated time
   struct datetime r;
   uint64 user_addr;
-  uint64 time_since_boot_ticks;
+  //uint64 time_since_boot_ticks;
+  uint64 cycles=mtime_read();
   uint64 total_seconds;
 
   // Local variables for date conversion
@@ -131,12 +132,13 @@ sys_datetime(void)
   argaddr(0, &user_addr);
 
   // 2. Safely get system uptime (in seconds)
-  acquire(&tickslock);
-  time_since_boot_ticks = ticks;
-  release(&tickslock);
+  //acquire(&tickslock);
+  //time_since_boot_ticks = ticks;
+  //release(&tickslock);
 
   // Convert ticks (assuming 100 Hz in xv6) to seconds
-  uint64 seconds_since_boot = time_since_boot_ticks / 100;
+  //uint64 seconds_since_boot = time_since_boot_ticks / 100;
+  uint64 seconds_since_boot=cycles/10000000; //mtime is more precise than ticks so i used it
   // total_seconds = (uint64)BOOT_EPOCH + seconds_since_boot;
 
   // BUILD_TIME is seconds since Jan 1, 1970 (defined in Makefile)

@@ -3,7 +3,7 @@
 
 int main() {
     printf("shutting down...\n");
-    printf("QEMU: TERMINATED (using function)\n");
+    printf("QEMU: TERMINATED (using the function)\n");
     shutdown();
     return 0;
 }
